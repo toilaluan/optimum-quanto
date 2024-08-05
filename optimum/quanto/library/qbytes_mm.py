@@ -72,7 +72,14 @@ def qbytes_mm_impl_default(
 
 @torch.library.impl("quanto::qbytes_mm", "CUDA")
 def qbytes_mm_impl_cuda(activations: torch.Tensor, weights: torch.Tensor, output_scales: torch.Tensor) -> torch.Tensor:
-    assert activations.ndim in (2, 3)
+    assert activations.ndim in (2, 3, 4)
+    in_features = activations.shape[-1]
+    if activations.ndim == 2:
+        tokens = activations.shape[0]
+    elif activations.ndim == 3:
+        tokens = activations.shape[0] * activations.shape[1]
+    elif activations.ndim == 4:
+        tokens = activations.shape[0] * activations.shape[1] * activations.shape[2]
     in_features = activations.shape[-1]
     tokens = activations.shape[0] if activations.ndim == 2 else activations.shape[0] * activations.shape[1]
     out_features = weights.shape[0]
